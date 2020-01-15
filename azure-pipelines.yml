@@ -1,0 +1,41 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+jobs:
+- job: BuildLinux
+  displayName: Build for Linux
+  dependsOn: [] # by specifying an empty array, this stage doesn't depend on the stage before it
+  pool:
+    vmImage: 'ubuntu-latest'
+  variables:
+    CC: gcc-7
+    CXX: g++-7
+  steps:
+  - task: SonarQubePrepare@4
+    inputs:
+      SonarQube: 'Peach'
+      scannerMode: 'CLI'
+      configMode: 'manual'
+      cliProjectKey: 'geoffray-azure-cmake-linux-test'
+      cliProjectName: 'geoffray-azure-cmake-linux-test'
+      cliSources: 'src'
+      extraProperties: 'sonar.cfamily.build-wrapper-output=build_wrapper_output_directory'
+  - bash: |
+      curl 'https://peach.sonarsource.com/static/cpp/build-wrapper-linux-x86.zip' --output build-wrapper-linux-x86.zip
+      unzip build-wrapper-linux-x86.zip
+    displayName: Install buildwrapper
+  - bash: |
+      mkdir build
+      cd build
+      cmake ..
+    workingDirectory: .
+    displayName: Prepare build
+  - bash: |
+      build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build/ --config Release
+    displayName: Compile project in build wrapper
+  - task: SonarQubeAnalyze@4
