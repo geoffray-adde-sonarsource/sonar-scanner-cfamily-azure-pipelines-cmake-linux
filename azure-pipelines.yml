@@ -39,6 +39,7 @@ jobs:
       build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build/ --config Release
     displayName: Compile project in build wrapper
   - task: SonarQubeAnalyze@4
+
 - job: BuildLinuxWithSonarCloud
   displayName: Build for Linux With SonarCloud
   dependsOn: [] # by specifying an empty array, this stage doesn't depend on the stage before it
@@ -48,10 +49,10 @@ jobs:
     CC: gcc-7
     CXX: g++-7
   steps:
-  
-  - task: SonarQubePrepare@4
+  - task: SonarCloudPrepare@1
     inputs:
-      SonarQube: 'Peach'
+      SonarCloud: 'SonarCloud'
+      organization: 'geoffray-adde-sonarsource-github'
       scannerMode: 'CLI'
       configMode: 'manual'
       cliProjectKey: 'geoffray-azure-cmake-linux-test'
@@ -71,4 +72,4 @@ jobs:
   - bash: |
       build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir build_wrapper_output_directory cmake --build build/ --config Release
     displayName: Compile project in build wrapper
-  - task: SonarQubeAnalyze@4
+  - task: SonarCloudAnalyze@1
